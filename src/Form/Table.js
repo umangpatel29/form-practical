@@ -1,8 +1,13 @@
+import { useEffect } from 'react';
 import Table from 'react-bootstrap/Table';
 
 
-const TableData = ({data, onDelete, onEdit}) => {
-    console.log(data)
+const TableData = ({ data, onDelete, onEdit, onSubmit }) => {
+    useEffect(() => {
+        const datas = localStorage.getItem('data')
+        
+        console.log(JSON.parse(datas))
+    }, [onSubmit])
     return (
         <div>
             <Table>

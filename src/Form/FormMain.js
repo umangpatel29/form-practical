@@ -1,15 +1,13 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import './form.css'
 import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
-import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
-import InputGroup from 'react-bootstrap/InputGroup';
-import Row from 'react-bootstrap/Row';
 import TableData from './Table';
 
 const FormMain = () => {
 
-    const [error, setErrors] = useState();
+    const [error, setErrors] = useState({});
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -19,6 +17,7 @@ const FormMain = () => {
         state: '',
         zipcode: ''
     })
+
     const [submitedData, setSubmited] = useState([])
 
     const handleChange = (e) => {
@@ -29,45 +28,82 @@ const FormMain = () => {
             [name]: value
         })
     }
-    const handleSubmit = (e) => {
-        e.preventDefault()
 
-        setSubmited([...submitedData, formData]);
-        if (validate()) {
-            localStorage.setItem('data', JSON.stringify(submitedData))
+    const validate = (formData) => {
+        const errors = {};
+
+        if (!formData.name) {
+            errors.name = 'Name is Required';
         }
+
+        if (!formData.email) {
+            errors.email = 'Email is required';
+        } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
+            errors.email = 'Invalid email address';
+        }
+
+        if (isNaN(formData.price) || formData.price <= 0) {
+            errors.price = 'Price must be a positive number';
+        }
+
+        if (isNaN(formData.quantity) || formData.quantity <= 0) {
+            errors.quantity = 'Quantity must be a positive number';
+        }
+
+        if (isNaN(formData.zipcode) || formData.zipcode <= 0) {
+            errors.zipcode = 'Zipcode must be a positive number';
+        }
+
+        if (!/^[a-zA-Z]+$/.test(formData.city) || !formData.city.trim()) {
+            errors.city = 'City must be a non-empty string without numbers';
+        }
+
+        return errors;
     };
 
-    const validate = () => {
-        let error = {};
-
-        if (formData.name === '') {
-            error.name = 'Name cannot be empty';
-        }
-        if (formData.email === '') {
-            error.email = 'Email cannot be empty';
-        }
-        if (/^[a-zA-Z]*$/.test(formData.city)) {
-            error.city = 'City cannot contain numbers';
-        }
-
-
-        setErrors(error);
-
-        return Object.keys(error).length === 0;
-    };
-    const handleEdit = (index) => {
-
-        const itemToEdit = submitedData[index];
-        setFormData(itemToEdit);
+    const handleEdit = (index, payload) => {
+        const deleted = submitedData.filter((_, id) => id !== index)
+        setSubmited(deleted)
+        setFormData({
+            name: payload.name,
+            email: payload.email,
+            price: payload.price,
+            quantity: payload.quantity,
+            city: payload.city,
+            state: payload.state,
+            zipcode: payload.zipcode,
+        });
     };
 
     const handleDelete = (index) => {
-        // Remove the selected row from the list
-        const updatedData = [...submitedData];
-        updatedData.splice(index, 1);
-        setSubmited(updatedData);
+        const deleted = submitedData.filter((_, id) => id !== index)
+        setSubmited(deleted)
     };
+
+    const handleSubmit = (e) => {
+        e.preventDefault()
+
+        const error = validate(formData)
+        if (Object.keys(error).length == 0) {
+            setSubmited([...submitedData, formData]);
+            setFormData({
+                name: '',
+                email: '',
+                price: '',
+                quantity: '',
+                city: '',
+                state: '',
+                zipcode: '',
+            });
+        } else {
+            setErrors(error)
+        }
+    };
+
+    useEffect(() => {
+        let string = JSON.stringify(submitedData)
+            localStorage.setItem('data', string);
+    }, [submitedData])
 
     return (
 
@@ -90,7 +126,7 @@ const FormMain = () => {
                                             value={formData.name}
                                             onChange={handleChange}
                                         />
-
+                                        {error.name && (<div>{error.name}</div>)}
                                     </Form.Group>
                                 </div>
                             </div>
@@ -152,9 +188,7 @@ const FormMain = () => {
                                             value={formData.city}
                                             onChange={handleChange}
                                         />
-                                        {/* {
-                                            error.city && (<div className='text-danger'>{error.city}</div>)
-                                        } */}
+                                        {error.city && (<div className='text-danger'>{error.city}</div>)}
                                     </Form.Group>
                                 </div>
                                 <div className="col-md-4">
@@ -172,7 +206,7 @@ const FormMain = () => {
                                         <Form.Control
                                             className='form-control'
                                             required
-                                            type="number"
+                                            type="text"
                                             placeholder="zipcode"
                                             name='zipcode'
                                             value={formData.zipcode}
@@ -189,7 +223,7 @@ const FormMain = () => {
                 </div>
             </div>
 
-            <TableData data={submitedData} onDelete={handleDelete} onEdit={handleEdit} />
+            <TableData data={submitedData} onDelete={handleDelete} onEdit={handleEdit} onSubmit={handleSubmit} />
         </div>
 
     )

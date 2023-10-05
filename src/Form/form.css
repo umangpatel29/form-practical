@@ -1,0 +1,20 @@
+.form-box{
+    max-width: 500px;
+    border: 1px solid black;
+    padding: 10px;
+    background-color: rgb(243, 245, 248);
+  }
+  
+  .btn{
+    background-color: black;
+    width: 100%;
+    color: #ffff;
+    padding: 8px;
+  }
+  
+  .form-control{
+    border : 1px solid rgb(173, 173, 173);
+    border-radius: 2px;
+  }
+  
+  
