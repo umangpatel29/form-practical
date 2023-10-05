@@ -64,15 +64,7 @@ const FormMain = () => {
     const handleEdit = (index, payload) => {
         const deleted = submitedData.filter((_, id) => id !== index)
         setSubmited(deleted)
-        setFormData({
-            name: payload.name,
-            email: payload.email,
-            price: payload.price,
-            quantity: payload.quantity,
-            city: payload.city,
-            state: payload.state,
-            zipcode: payload.zipcode,
-        });
+        setFormData(payload);
     };
 
     const handleDelete = (index) => {
